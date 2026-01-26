@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 720">
+  <defs>
+    <linearGradient id="water" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2f58b3" />
+      <stop offset="100%" stop-color="#1f3c86" />
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="720" fill="url(#water)" />
+  <path
+    d="M140 200 L200 150 L320 140 L440 150 L560 140 L680 150 L820 140 L940 170 L1020 210 L1060 260 L1080 320 L1070 380 L1040 420 L1010 430 L1000 460 L1010 500 L980 560 L920 550 L890 520 L860 520 L830 520 L780 510 L700 520 L630 540 L560 530 L500 540 L430 560 L360 550 L300 520 L240 480 L200 440 L170 380 L150 320 L140 260 Z"
+    fill="#6b6a72"
+    stroke="#4a4a52"
+    stroke-width="6"
+  />
+  <path d="M180 560 L260 540 L300 570 L260 620 L190 610 Z" fill="#5d5c64" stroke="#4a4a52" stroke-width="4" />
+  <circle cx="320" cy="610" r="12" fill="#5d5c64" />
+  <circle cx="350" cy="620" r="10" fill="#5d5c64" />
+  <circle cx="380" cy="610" r="8" fill="#5d5c64" />
+  <g stroke="#50505a" stroke-width="3" opacity="0.6">
+    <path d="M360 200 L360 520" />
+    <path d="M520 180 L520 520" />
+    <path d="M700 170 L700 510" />
+    <path d="M880 190 L880 520" />
+    <path d="M260 300 L980 300" />
+    <path d="M240 380 L1010 380" />
+    <path d="M240 450 L980 450" />
+  </g>
+</svg>
