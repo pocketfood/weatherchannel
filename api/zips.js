@@ -1,18 +1,28 @@
-const fs = require('fs');
-const path = require('path');
-
 module.exports = (req, res) => {
-  try {
-    const filePath = path.join(process.cwd(), 'backend', 'data', 'zips.txt');
-    const contents = fs.readFileSync(filePath, 'utf8');
-    const zips = contents
-      .split(/[\n,]+/)
-      .map((zip) => zip.trim())
-      .filter(Boolean);
+  const raw = process.env.WEATHER_ZIPS || '';
+  const stateRaw = process.env.WEATHER_STATE_JSON || '';
+  let zips = raw
+    .split(/[\n,]+/)
+    .map((zip) => zip.trim())
+    .filter(Boolean);
 
-    res.setHeader('Content-Type', 'application/json; charset=utf-8');
-    res.status(200).json({ zips });
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to load zips', detail: String(err) });
+  if (!zips.length && stateRaw) {
+    try {
+      const parsed = JSON.parse(stateRaw);
+      zips = Array.isArray(parsed.locations)
+        ? parsed.locations.map((loc) => loc.zip).filter(Boolean)
+        : [];
+    } catch (_err) {
+      zips = [];
+    }
   }
+
+  if (!zips.length) {
+    res.status(200).json({ zips: [] });
+    return;
+  }
+
+  res.setHeader('Content-Type', 'application/json; charset=utf-8');
+  res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=600');
+  res.status(200).json({ zips });
 };
