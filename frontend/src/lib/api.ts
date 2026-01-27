@@ -16,9 +16,10 @@ async function fetchJson<T>(url: string, signal?: AbortSignal): Promise<T> {
 }
 
 export async function fetchWeatherState(signal?: AbortSignal): Promise<WeatherState> {
-  if (apiBase) {
-    return fetchJson<WeatherState>(`${apiBase}/api/state`, signal);
+  const url = apiBase ? `${apiBase}/api/state` : '/api/state';
+  try {
+    return await fetchJson<WeatherState>(url, signal);
+  } catch (_err) {
+    return fetchJson<WeatherState>('/state.json', signal);
   }
-
-  return fetchJson<WeatherState>('/state.json', signal);
 }
