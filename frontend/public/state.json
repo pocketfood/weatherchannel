@@ -1,0 +1,308 @@
+{
+  "generatedAt": "2025-01-25T12:00:00Z",
+  "location": {
+    "name": "Brooklyn, NY",
+    "zip": "11229"
+  },
+  "forecast": [
+    {
+      "period": "Tonight",
+      "summary": "Light snow, breezy",
+      "tempF": 28,
+      "highF": 28,
+      "lowF": 18,
+      "precipChance": 40
+    },
+    {
+      "period": "Wed",
+      "summary": "Clouds and flurries",
+      "tempF": 31,
+      "highF": 31,
+      "lowF": 20,
+      "precipChance": 20
+    },
+    {
+      "period": "Wed Night",
+      "summary": "Mostly cloudy",
+      "tempF": 24,
+      "highF": 24,
+      "lowF": 16
+    },
+    {
+      "period": "Thu",
+      "summary": "Partly sunny",
+      "tempF": 36,
+      "highF": 36,
+      "lowF": 24,
+      "precipChance": 10
+    },
+    {
+      "period": "Fri",
+      "summary": "Snow showers",
+      "tempF": 30,
+      "highF": 30,
+      "lowF": 18,
+      "precipChance": 50
+    }
+  ],
+  "locations": [
+    {
+      "name": "Brooklyn, NY",
+      "zip": "11229",
+      "forecast": [
+        {
+          "period": "Tonight",
+          "summary": "Light snow, breezy",
+          "tempF": 28,
+          "highF": 28,
+          "lowF": 18,
+          "precipChance": 40
+        },
+        {
+          "period": "Wed",
+          "summary": "Clouds and flurries",
+          "tempF": 31,
+          "highF": 31,
+          "lowF": 20,
+          "precipChance": 20
+        },
+        {
+          "period": "Wed Night",
+          "summary": "Mostly cloudy",
+          "tempF": 24,
+          "highF": 24,
+          "lowF": 16
+        },
+        {
+          "period": "Thu",
+          "summary": "Partly sunny",
+          "tempF": 36,
+          "highF": 36,
+          "lowF": 24,
+          "precipChance": 10
+        },
+        {
+          "period": "Fri",
+          "summary": "Snow showers",
+          "tempF": 30,
+          "highF": 30,
+          "lowF": 18,
+          "precipChance": 50
+        }
+      ]
+    },
+    {
+      "name": "Georgia",
+      "zip": "31302",
+      "forecast": [
+        {
+          "period": "Tonight",
+          "summary": "Clear",
+          "tempF": 46,
+          "highF": 46,
+          "lowF": 34
+        },
+        {
+          "period": "Wed",
+          "summary": "Sunny",
+          "tempF": 58,
+          "highF": 58,
+          "lowF": 38
+        },
+        {
+          "period": "Wed Night",
+          "summary": "Partly cloudy",
+          "tempF": 42,
+          "highF": 42,
+          "lowF": 30
+        },
+        {
+          "period": "Thu",
+          "summary": "Mostly sunny",
+          "tempF": 62,
+          "highF": 62,
+          "lowF": 40
+        },
+        {
+          "period": "Fri",
+          "summary": "Chance of showers",
+          "tempF": 58,
+          "highF": 58,
+          "lowF": 44,
+          "precipChance": 30
+        }
+      ]
+    },
+    {
+      "name": "Tulsa, OK",
+      "zip": "74136",
+      "forecast": [
+        {
+          "period": "Tonight",
+          "summary": "Clear",
+          "tempF": 32,
+          "highF": 32,
+          "lowF": 20
+        },
+        {
+          "period": "Wed",
+          "summary": "Windy",
+          "tempF": 45,
+          "highF": 45,
+          "lowF": 28
+        },
+        {
+          "period": "Wed Night",
+          "summary": "Cloudy",
+          "tempF": 30,
+          "highF": 30,
+          "lowF": 22
+        },
+        {
+          "period": "Thu",
+          "summary": "Partly sunny",
+          "tempF": 48,
+          "highF": 48,
+          "lowF": 30
+        },
+        {
+          "period": "Fri",
+          "summary": "Rain showers",
+          "tempF": 42,
+          "highF": 42,
+          "lowF": 30,
+          "precipChance": 40
+        }
+      ]
+    },
+    {
+      "name": "Austin, TX",
+      "zip": "73301",
+      "forecast": [
+        {
+          "period": "Tonight",
+          "summary": "Partly cloudy",
+          "tempF": 55,
+          "highF": 55,
+          "lowF": 45
+        },
+        {
+          "period": "Wed",
+          "summary": "Sunny",
+          "tempF": 68,
+          "highF": 68,
+          "lowF": 48
+        },
+        {
+          "period": "Wed Night",
+          "summary": "Mild",
+          "tempF": 52,
+          "highF": 52,
+          "lowF": 44
+        },
+        {
+          "period": "Thu",
+          "summary": "Partly sunny",
+          "tempF": 72,
+          "highF": 72,
+          "lowF": 50
+        },
+        {
+          "period": "Fri",
+          "summary": "Showers",
+          "tempF": 66,
+          "highF": 66,
+          "lowF": 52,
+          "precipChance": 40
+        }
+      ]
+    }
+  ],
+  "almanac": {
+    "sunrise": "07:12 AM",
+    "sunset": "05:04 PM",
+    "sunriseTomorrow": "07:11 AM",
+    "sunsetTomorrow": "05:05 PM",
+    "moonPhase": "Waning Gibbous",
+    "moonIllumination": 73,
+    "moonPhases": [
+      { "name": "First", "date": "Jan 19" },
+      { "name": "Full", "date": "Jan 27" },
+      { "name": "Last", "date": "Feb 3" },
+      { "name": "New", "date": "Feb 10" }
+    ]
+  },
+  "regional": {
+    "title": "United States",
+    "mapImage": "/media/maps/region-placeholder.svg",
+    "overlays": [
+      {
+        "label": "Brooklyn",
+        "tempF": 31,
+        "condition": "Cloudy",
+        "lat": 40.6017,
+        "lon": -73.9448
+      },
+      {
+        "label": "Pittsburgh",
+        "tempF": 24,
+        "condition": "Snow",
+        "lat": 40.473,
+        "lon": -79.95
+      },
+      {
+        "label": "Washington DC",
+        "tempF": 29,
+        "condition": "Clear",
+        "lat": 37.7,
+        "lon": -76.2
+      },
+      {
+        "label": "Tulsa",
+        "tempF": 38,
+        "condition": "Clear",
+        "lat": 35.6,
+        "lon": -97.6
+      },
+      {
+        "label": "Austin",
+        "tempF": 56,
+        "condition": "Breezy",
+        "lat": 30.6,
+        "lon": -100.6
+      },
+      {
+        "label": "Bloomingdale",
+        "tempF": 44,
+        "condition": "Clear",
+        "lat": 32.125,
+        "lon": -81.335
+      },
+      {
+        "label": "Alabama",
+        "tempF": 48,
+        "condition": "Clear",
+        "lat": 34.2,
+        "lon": -88.2
+      },
+      {
+        "label": "Pensacola",
+        "tempF": 54,
+        "condition": "Clear",
+        "lat": 30.4213,
+        "lon": -87.2169
+      }
+    ]
+  },
+  "ticker": [
+    "Lake effect snow bands continue overnight",
+    "Wind chill advisory for northern counties",
+    "Sunrise 7:12 AM | Sunset 5:04 PM",
+    "Moon phase: Waning Gibbous"
+  ],
+  "alerts": [
+    {
+      "title": "Winter Weather Advisory"
+    }
+  ]
+}
