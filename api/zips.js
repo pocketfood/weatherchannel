@@ -1,10 +1,22 @@
 module.exports = (req, res) => {
   const raw = process.env.WEATHER_ZIPS || '';
   const stateRaw = process.env.WEATHER_STATE_JSON || '';
+  const locationsRaw = process.env.WEATHER_LOCATIONS_JSON || '';
   let zips = raw
     .split(/[\n,]+/)
     .map((zip) => zip.trim())
     .filter(Boolean);
+
+  if (!zips.length && locationsRaw) {
+    try {
+      const parsed = JSON.parse(locationsRaw);
+      if (Array.isArray(parsed)) {
+        zips = parsed.map((loc) => loc.zip).filter(Boolean);
+      }
+    } catch (_err) {
+      zips = [];
+    }
+  }
 
   if (!zips.length && stateRaw) {
     try {
