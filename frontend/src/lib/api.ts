@@ -30,12 +30,8 @@ export async function fetchWeatherState(signal?: AbortSignal): Promise<WeatherSt
   }
 
   try {
-    return await fetchJson<WeatherState>('/api/state', signal);
+    return await fetchJson<WeatherState>('/state.json', signal);
   } catch (_err) {
-    try {
-      return await fetchJson<WeatherState>('/state.json', signal);
-    } catch (_fallbackErr) {
-      return fallbackState as WeatherState;
-    }
+    return fallbackState as WeatherState;
   }
 }
