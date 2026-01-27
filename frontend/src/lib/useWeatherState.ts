@@ -1,11 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import type { WeatherState } from '../types';
 import { fetchWeatherState } from './api';
+import fallbackState from '../data/defaultState.json';
 
 const REFRESH_MS = 60_000;
 
 export function useWeatherState() {
-  const [state, setState] = useState<WeatherState | null>(null);
+  const [state, setState] = useState<WeatherState | null>(
+    fallbackState as WeatherState
+  );
   const [error, setError] = useState<string | null>(null);
   const isMounted = useRef(true);
 
