@@ -1,4 +1,5 @@
 import type { WeatherState } from '../types';
+import fallbackState from '../data/defaultState.json';
 
 const apiBase = import.meta.env.VITE_API_BASE || '';
 
@@ -20,13 +21,21 @@ export async function fetchWeatherState(signal?: AbortSignal): Promise<WeatherSt
     try {
       return await fetchJson<WeatherState>(`${apiBase}/api/state`, signal);
     } catch (_err) {
-      return fetchJson<WeatherState>('/state.json', signal);
+      try {
+        return await fetchJson<WeatherState>('/state.json', signal);
+      } catch (_fallbackErr) {
+        return fallbackState as WeatherState;
+      }
     }
   }
 
   try {
     return await fetchJson<WeatherState>('/api/state', signal);
   } catch (_err) {
-    return fetchJson<WeatherState>('/state.json', signal);
+    try {
+      return await fetchJson<WeatherState>('/state.json', signal);
+    } catch (_fallbackErr) {
+      return fallbackState as WeatherState;
+    }
   }
 }
