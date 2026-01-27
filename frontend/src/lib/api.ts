@@ -7,16 +7,21 @@ async function fetchJson<T>(url: string, signal?: AbortSignal): Promise<T> {
   if (!response.ok) {
     throw new Error(`Failed to load state: ${response.status}`);
   }
-  const contentType = response.headers.get('content-type') ?? '';
-  if (!contentType.includes('application/json')) {
+  const text = await response.text();
+  try {
+    return JSON.parse(text) as T;
+  } catch (_err) {
     throw new Error('Unexpected response format');
   }
-  return response.json() as Promise<T>;
 }
 
 export async function fetchWeatherState(signal?: AbortSignal): Promise<WeatherState> {
   if (apiBase) {
-    return fetchJson<WeatherState>(`${apiBase}/api/state`, signal);
+    try {
+      return await fetchJson<WeatherState>(`${apiBase}/api/state`, signal);
+    } catch (_err) {
+      return fetchJson<WeatherState>('/state.json', signal);
+    }
   }
 
   try {
