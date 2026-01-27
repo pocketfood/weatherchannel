@@ -36,18 +36,20 @@ Mock data lives in `backend/data/state.json`. Replace it with live API data when
 This deployment uses Vercel serverless functions instead of a long-running backend.
 
 Set the following Vercel Environment Variables:
-- `WEATHER_STATE_JSON` (required): full JSON payload for the current state.
+- `WEATHER_LOCATIONS_JSON` (recommended): array of locations with lat/lon for live data.
 - `WEATHER_STATE_BASE64` (optional): base64-encoded JSON (useful if quoting JSON is painful).
+- `WEATHER_STATE_JSON` (optional): full JSON payload for the current state (fallback if live fetch is not configured).
 - `WEATHER_ZIPS` (optional): comma-separated ZIPs for the `/api/zips` endpoint.
+- `WEATHER_REGION_TITLE` (optional): title shown above the regional map.
 
-Example `WEATHER_STATE_JSON` (single-line JSON):
+Example `WEATHER_LOCATIONS_JSON` (single-line JSON):
 ```json
-{"generatedAt":"2025-01-25T12:00:00Z","location":{"name":"Metro Area","zip":"00000"},"forecast":[{"period":"Tonight","summary":"Light snow, breezy","tempF":28,"highF":28,"lowF":18,"precipChance":40}],"almanac":{"sunrise":"07:12 AM","sunset":"05:04 PM","moonPhase":"Waning Gibbous","moonIllumination":73},"regional":{"title":"United States","mapImage":"/media/maps/region-placeholder.svg","overlays":[{"label":"Northeast","tempF":31,"condition":"Cloudy","lat":41.2,"lon":-74.8}]},"ticker":["Lake effect snow bands continue overnight"]}
+[{"name":"Metro Area","label":"Metro","zip":"00000","lat":40.71,"lon":-74.0},{"name":"Coastal South","label":"Coastal","zip":"11111","lat":32.08,"lon":-81.09},{"name":"Central Plains","label":"Plains","zip":"22222","lat":36.15,"lon":-95.99},{"name":"Hill Country","label":"Hill Country","zip":"33333","lat":30.27,"lon":-97.74}]
 ```
 
 Notes:
 - Ensure the Vercel project Root Directory is the repo root so `/api/*` functions deploy.
-- If `WEATHER_STATE_JSON` is not set, the app falls back to `frontend/public/state.json`.
+- If `WEATHER_LOCATIONS_JSON` is not set, the API falls back to `WEATHER_STATE_JSON`, then the app falls back to `frontend/public/state.json`.
 
 ## Map styling
 The `/weathermap` page uses `maptalks` with a Carto basemap URL. For offline use, swap the tile URL to a local tileserver.
