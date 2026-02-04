@@ -11,7 +11,13 @@ type MapPageProps = {
 export default function MapPage({ state }: MapPageProps) {
   const mapRef = useRef<maptalks.Map | null>(null);
   const markersRef = useRef<maptalks.ui.UIMarker[]>([]);
-  const radarLayerRef = useRef<maptalks.TileLayer | null>(null);
+  const radarLayersRef = useRef<[maptalks.TileLayer | null, maptalks.TileLayer | null]>([
+    null,
+    null
+  ]);
+  const radarActiveRef = useRef(0);
+  const radarFadeRef = useRef<number | null>(null);
+  const radarFadeTimeoutRef = useRef<number | null>(null);
   const mapHostRef = useRef<HTMLDivElement | null>(null);
   const [radarHost, setRadarHost] = useState('https://tilecache.rainviewer.com');
   const [radarFrames, setRadarFrames] = useState<RadarFrame[]>([]);
@@ -57,6 +63,12 @@ export default function MapPage({ state }: MapPageProps) {
       window.clearTimeout(timer);
       window.removeEventListener('resize', refreshSize);
       map.remove();
+      if (radarFadeRef.current) {
+        window.cancelAnimationFrame(radarFadeRef.current);
+      }
+      if (radarFadeTimeoutRef.current) {
+        window.clearTimeout(radarFadeTimeoutRef.current);
+      }
       mapRef.current = null;
     };
   }, []);
@@ -84,7 +96,7 @@ export default function MapPage({ state }: MapPageProps) {
         setRadarFrames([...past, ...nowcast]);
       } catch (_err) {
         if (isActive) {
-          setRadarFrames([]);
+          setRadarFrames((prev) => (prev.length ? prev : []));
         }
       }
     };
@@ -107,7 +119,7 @@ export default function MapPage({ state }: MapPageProps) {
 
     const timer = window.setInterval(() => {
       setFrameIndex((prev) => (prev + 1) % radarFrames.length);
-    }, 2000);
+    }, 1800);
 
     return () => window.clearInterval(timer);
   }, [radarFrames.length]);
@@ -126,20 +138,76 @@ export default function MapPage({ state }: MapPageProps) {
       return;
     }
 
-    if (!radarLayerRef.current) {
-      const layer = new maptalks.TileLayer('radar', {
+    const RADAR_OPACITY = 0.65;
+    const RADAR_FADE_MS = 700;
+    const RADAR_LOAD_TIMEOUT_MS = 700;
+
+    const activeIndex = radarActiveRef.current;
+    const nextIndex = (activeIndex + 1) % 2;
+    const activeLayer = radarLayersRef.current[activeIndex];
+    let nextLayer = radarLayersRef.current[nextIndex];
+
+    if (!nextLayer) {
+      nextLayer = new maptalks.TileLayer(`radar-${nextIndex}`, {
         urlTemplate: radarUrl,
-        opacity: 0.65,
-        zIndex: 3,
+        opacity: 0,
+        zIndex: 4,
         crossOrigin: 'anonymous',
         renderer: 'canvas'
       });
-      layer.addTo(map);
-      radarLayerRef.current = layer;
+      nextLayer.addTo(map);
+      radarLayersRef.current[nextIndex] = nextLayer;
     } else {
-      radarLayerRef.current.setOptions({ urlTemplate: radarUrl });
-      radarLayerRef.current.forceReload();
+      nextLayer.setOptions({ urlTemplate: radarUrl });
+      nextLayer.setOpacity(0);
+      nextLayer.setZIndex(4);
     }
+
+    if (activeLayer) {
+      activeLayer.setZIndex(3);
+      activeLayer.setOpacity(RADAR_OPACITY);
+    }
+
+    const clearFade = () => {
+      if (radarFadeRef.current) {
+        window.cancelAnimationFrame(radarFadeRef.current);
+        radarFadeRef.current = null;
+      }
+      if (radarFadeTimeoutRef.current) {
+        window.clearTimeout(radarFadeTimeoutRef.current);
+        radarFadeTimeoutRef.current = null;
+      }
+    };
+
+    const startFade = () => {
+      clearFade();
+      const start = performance.now();
+      const step = (now: number) => {
+        const progress = Math.min((now - start) / RADAR_FADE_MS, 1);
+        const nextOpacity = progress * RADAR_OPACITY;
+        const activeOpacity = RADAR_OPACITY - nextOpacity;
+        if (activeLayer) {
+          activeLayer.setOpacity(activeOpacity);
+        }
+        nextLayer?.setOpacity(nextOpacity);
+        if (progress < 1) {
+          radarFadeRef.current = window.requestAnimationFrame(step);
+        }
+      };
+      radarFadeRef.current = window.requestAnimationFrame(step);
+      radarActiveRef.current = nextIndex;
+    };
+
+    const timeoutId = window.setTimeout(startFade, RADAR_LOAD_TIMEOUT_MS);
+    radarFadeTimeoutRef.current = timeoutId;
+    nextLayer.once?.('layerload', () => {
+      window.clearTimeout(timeoutId);
+      startFade();
+    });
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
   }, [radarUrl]);
 
   useEffect(() => {
