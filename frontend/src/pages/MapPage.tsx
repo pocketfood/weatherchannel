@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import * as maptalks from 'maptalks';
-import 'maptalks/dist/maptalks.css';
+import maplibregl from 'maplibre-gl';
+import 'maplibre-gl/dist/maplibre-gl.css';
 import PageFrame from '../components/PageFrame';
 import type { RegionalOverlay, WeatherState } from '../types';
 
@@ -8,16 +8,47 @@ type MapPageProps = {
   state: WeatherState | null;
 };
 
+const BASE_TILES = [
+  'https://a.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}.png',
+  'https://b.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}.png',
+  'https://c.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}.png',
+  'https://d.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}.png'
+];
+
+const BASE_STYLE: maplibregl.StyleSpecification = {
+  version: 8,
+  sources: {
+    base: {
+      type: 'raster',
+      tiles: BASE_TILES,
+      tileSize: 256,
+      attribution: ''
+    }
+  },
+  layers: [
+    {
+      id: 'base',
+      type: 'raster',
+      source: 'base',
+      paint: {
+        'raster-opacity': 0.95
+      }
+    }
+  ]
+};
+
+const RADAR_TILE_SIZE = 512;
+const RADAR_COLOR_SCHEME = 2;
+const RADAR_SMOOTH = 1;
+const RADAR_SNOW = 1;
+const RADAR_OPACITY = 0.7;
+const RADAR_TILE_FADE_MS = 0;
+const RADAR_FRAME_MS = 1000;
+const RADAR_PAST_FRAMES = 10;
+
 export default function MapPage({ state }: MapPageProps) {
-  const mapRef = useRef<maptalks.Map | null>(null);
-  const markersRef = useRef<maptalks.ui.UIMarker[]>([]);
-  const radarLayersRef = useRef<[maptalks.TileLayer | null, maptalks.TileLayer | null]>([
-    null,
-    null
-  ]);
-  const radarActiveRef = useRef(0);
-  const radarFadeRef = useRef<number | null>(null);
-  const radarFadeTimeoutRef = useRef<number | null>(null);
+  const mapRef = useRef<maplibregl.Map | null>(null);
+  const markersRef = useRef<maplibregl.Marker[]>([]);
   const mapHostRef = useRef<HTMLDivElement | null>(null);
   const [radarHost, setRadarHost] = useState('https://tilecache.rainviewer.com');
   const [radarFrames, setRadarFrames] = useState<RadarFrame[]>([]);
@@ -28,47 +59,25 @@ export default function MapPage({ state }: MapPageProps) {
       return;
     }
 
-    const map = new maptalks.Map(mapHostRef.current, {
-      center: [-86, 35.8],
-      zoom: 5.1,
+    const map = new maplibregl.Map({
+      container: mapHostRef.current,
+      style: BASE_STYLE,
+      center: [-81.5, 38.2],
+      zoom: 4.5,
       minZoom: 3,
-      maxZoom: 6,
-      pitch: 0,
-      attribution: false,
-      zoomControl: false,
-      zoomable: false,
-      draggable: false,
-      scrollWheelZoom: false,
-      doubleClickZoom: false,
-      dragRotate: false,
-      touchZoom: false,
-      touchRotate: false,
-      baseLayer: new maptalks.TileLayer('base', {
-        urlTemplate: 'https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}.png',
-        subdomains: ['a', 'b', 'c', 'd'],
-        opacity: 0.95,
-        crossOrigin: 'anonymous',
-        renderer: 'canvas'
-      })
+      maxZoom: 7,
+      attributionControl: false,
+      interactive: false
     });
 
     mapRef.current = map;
-    const refreshSize = () => map.checkSize();
-    const raf = window.requestAnimationFrame(refreshSize);
-    const timer = window.setTimeout(refreshSize, 150);
-    window.addEventListener('resize', refreshSize);
+    const handleResize = () => map.resize();
+    map.on('load', handleResize);
+    window.addEventListener('resize', handleResize);
 
     return () => {
-      window.cancelAnimationFrame(raf);
-      window.clearTimeout(timer);
-      window.removeEventListener('resize', refreshSize);
+      window.removeEventListener('resize', handleResize);
       map.remove();
-      if (radarFadeRef.current) {
-        window.cancelAnimationFrame(radarFadeRef.current);
-      }
-      if (radarFadeTimeoutRef.current) {
-        window.clearTimeout(radarFadeTimeoutRef.current);
-      }
       mapRef.current = null;
     };
   }, []);
@@ -90,7 +99,7 @@ export default function MapPage({ state }: MapPageProps) {
           return;
         }
 
-        const past = data.radar.past.slice(-6);
+        const past = data.radar.past.slice(-RADAR_PAST_FRAMES);
         const nowcast = data.radar.nowcast ?? [];
         setRadarHost(data.host);
         setRadarFrames([...past, ...nowcast]);
@@ -119,7 +128,7 @@ export default function MapPage({ state }: MapPageProps) {
 
     const timer = window.setInterval(() => {
       setFrameIndex((prev) => (prev + 1) % radarFrames.length);
-    }, 1800);
+    }, RADAR_FRAME_MS);
 
     return () => window.clearInterval(timer);
   }, [radarFrames.length]);
@@ -129,7 +138,7 @@ export default function MapPage({ state }: MapPageProps) {
     if (!frame) {
       return null;
     }
-    return `${radarHost}${frame.path}/256/{z}/{x}/{y}/2/1_1.png`;
+    return `${radarHost}${frame.path}/${RADAR_TILE_SIZE}/{z}/{x}/{y}/${RADAR_COLOR_SCHEME}/${RADAR_SMOOTH}_${RADAR_SNOW}.png`;
   }, [radarFrames, frameIndex, radarHost]);
 
   useEffect(() => {
@@ -138,76 +147,65 @@ export default function MapPage({ state }: MapPageProps) {
       return;
     }
 
-    const RADAR_OPACITY = 0.65;
-    const RADAR_FADE_MS = 700;
-    const RADAR_LOAD_TIMEOUT_MS = 700;
+    const applyRadar = () => {
+      const sourceId = 'radar-source';
+      const layerId = 'radar-layer';
+      const source = map.getSource(sourceId) as maplibregl.RasterSource | undefined;
 
-    const activeIndex = radarActiveRef.current;
-    const nextIndex = (activeIndex + 1) % 2;
-    const activeLayer = radarLayersRef.current[activeIndex];
-    let nextLayer = radarLayersRef.current[nextIndex];
+      if (!source) {
+        map.addSource(sourceId, {
+          type: 'raster',
+          tiles: [radarUrl],
+          tileSize: RADAR_TILE_SIZE,
+          attribution: ''
+        });
+        map.addLayer({
+          id: layerId,
+          type: 'raster',
+          source: sourceId,
+          paint: {
+            'raster-opacity': RADAR_OPACITY,
+            'raster-resampling': 'linear',
+            'raster-fade-duration': RADAR_TILE_FADE_MS
+          }
+        });
+        return;
+      }
 
-    if (!nextLayer) {
-      nextLayer = new maptalks.TileLayer(`radar-${nextIndex}`, {
-        urlTemplate: radarUrl,
-        opacity: 0,
-        zIndex: 4,
-        crossOrigin: 'anonymous',
-        renderer: 'canvas'
+      if (typeof (source as { setTiles?: (tiles: string[]) => void }).setTiles === 'function') {
+        (source as { setTiles: (tiles: string[]) => void }).setTiles([radarUrl]);
+        return;
+      }
+
+      if (map.getLayer(layerId)) {
+        map.removeLayer(layerId);
+      }
+      map.removeSource(sourceId);
+      map.addSource(sourceId, {
+        type: 'raster',
+        tiles: [radarUrl],
+        tileSize: RADAR_TILE_SIZE,
+        attribution: ''
       });
-      nextLayer.addTo(map);
-      radarLayersRef.current[nextIndex] = nextLayer;
-    } else {
-      nextLayer.setOptions({ urlTemplate: radarUrl });
-      nextLayer.setOpacity(0);
-      nextLayer.setZIndex(4);
+      map.addLayer({
+        id: layerId,
+        type: 'raster',
+        source: sourceId,
+        paint: {
+          'raster-opacity': RADAR_OPACITY,
+          'raster-resampling': 'linear',
+          'raster-fade-duration': RADAR_TILE_FADE_MS
+        }
+      });
+    };
+
+    if (!map.isStyleLoaded()) {
+      const handleLoad = () => applyRadar();
+      map.once('load', handleLoad);
+      return () => map.off('load', handleLoad);
     }
 
-    if (activeLayer) {
-      activeLayer.setZIndex(3);
-      activeLayer.setOpacity(RADAR_OPACITY);
-    }
-
-    const clearFade = () => {
-      if (radarFadeRef.current) {
-        window.cancelAnimationFrame(radarFadeRef.current);
-        radarFadeRef.current = null;
-      }
-      if (radarFadeTimeoutRef.current) {
-        window.clearTimeout(radarFadeTimeoutRef.current);
-        radarFadeTimeoutRef.current = null;
-      }
-    };
-
-    const startFade = () => {
-      clearFade();
-      const start = performance.now();
-      const step = (now: number) => {
-        const progress = Math.min((now - start) / RADAR_FADE_MS, 1);
-        const nextOpacity = progress * RADAR_OPACITY;
-        const activeOpacity = RADAR_OPACITY - nextOpacity;
-        if (activeLayer) {
-          activeLayer.setOpacity(activeOpacity);
-        }
-        nextLayer?.setOpacity(nextOpacity);
-        if (progress < 1) {
-          radarFadeRef.current = window.requestAnimationFrame(step);
-        }
-      };
-      radarFadeRef.current = window.requestAnimationFrame(step);
-      radarActiveRef.current = nextIndex;
-    };
-
-    const timeoutId = window.setTimeout(startFade, RADAR_LOAD_TIMEOUT_MS);
-    radarFadeTimeoutRef.current = timeoutId;
-    nextLayer.once?.('layerload', () => {
-      window.clearTimeout(timeoutId);
-      startFade();
-    });
-
-    return () => {
-      window.clearTimeout(timeoutId);
-    };
+    applyRadar();
   }, [radarUrl]);
 
   useEffect(() => {
@@ -236,7 +234,7 @@ export default function MapPage({ state }: MapPageProps) {
             <span>Heavy</span>
           </div>
         </div>
-        <div ref={mapHostRef} className="maptalks-map" />
+        <div ref={mapHostRef} className="maplibre-map" />
         {!state && <div className="map-loading">Loading regional map...</div>}
       </div>
     </PageFrame>
@@ -256,21 +254,18 @@ type RainViewerResponse = {
   };
 };
 
-function createOverlayMarker(map: maptalks.Map, overlay: RegionalOverlay) {
-  const content = `
-    <div class="map-overlay">
-      <div class="map-overlay-label">${overlay.label}</div>
-      <div class="map-overlay-temp">${overlay.tempF}</div>
-      <div class="map-overlay-cond">${overlay.condition}</div>
-    </div>
+function createOverlayMarker(map: maplibregl.Map, overlay: RegionalOverlay) {
+  const wrapper = document.createElement('div');
+  wrapper.className = 'map-overlay';
+  wrapper.innerHTML = `
+    <div class="map-overlay-label">${overlay.label}</div>
+    <div class="map-overlay-temp">${overlay.tempF}</div>
+    <div class="map-overlay-cond">${overlay.condition}</div>
   `;
 
-  const marker = new maptalks.ui.UIMarker([overlay.lon, overlay.lat], {
-    content,
-    dy: -10,
-    draggable: false
-  });
+  const marker = new maplibregl.Marker({ element: wrapper, anchor: 'center' })
+    .setLngLat([overlay.lon, overlay.lat])
+    .addTo(map);
 
-  marker.addTo(map);
   return marker;
 }
