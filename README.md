@@ -27,6 +27,28 @@ Frontend runs at `http://localhost:5173` and proxies `/api` + `/media` to the ba
 ## Data
 Mock data lives in `backend/data/state.json`. Replace it with live API data when ready.
 
+For a simple editable list of locations on the VM, use:
+- `backend/data/locations.json` (name/label/zip/lat/lon)
+- `backend/data/zips.txt` (one ZIP per line, used by `/api/zips` if locations are not set)
+Note: Open-Meteo requires latitude/longitude; ZIP-only entries are ignored unless you provide lat/lon.
+
+## Live backend (VM / reverse proxy)
+The Express backend can fetch live data from Open-Meteo. This is recommended for your Debian 13 VM.
+
+Requirements:
+- Node.js 18+ (for native `fetch`)
+
+Environment variables:
+- `WEATHER_LOCATIONS_JSON` (recommended): array of locations with lat/lon for live data.
+- `WEATHER_LOCATIONS_BASE64` (optional): base64-encoded JSON for locations.
+- `WEATHER_LOCATIONS_FILE` (optional): path to a locations JSON file (defaults to `backend/data/locations.json`).
+- `WEATHER_REFRESH_MS` (optional): refresh interval in ms (default 60000).
+- `WEATHER_REGION_TITLE` (optional): title shown above the regional map.
+- `WEATHER_STATE_JSON` / `WEATHER_STATE_BASE64` (optional): fallback static state if locations are not set.
+- `WEATHER_ZIPS_FILE` (optional): path to a ZIP list (defaults to `backend/data/zips.txt`).
+
+If no env vars are set, the backend falls back to `backend/data/state.json`.
+
 ## Routes
 - `/forecast` Extended Forecast screen
 - `/weathermap` Regional Observations screen
