@@ -1,0 +1,9 @@
+[
+  { "name": "New York City, NY", "label": "New York City", "zip": "10001", "lat": 40.7508, "lon": -73.9961 },
+  { "name": "Bethany, OK", "label": "Bethany", "zip": "73008", "lat": 35.5186, "lon": -97.6451 },
+  { "name": "Austin, TX", "label": "Austin", "zip": "73301", "lat": 30.2197, "lon": -97.7473 },
+  { "name": "Pensacola, FL", "label": "Pensacola", "zip": "32501", "lat": 30.4242, "lon": -87.2211 },
+  { "name": "Burlington, VT", "label": "Burlington", "zip": "05401", "lat": 44.4751, "lon": -73.2217 },
+  { "name": "Alpharetta, GA", "label": "Alpharetta", "zip": "30005", "lat": 34.0905, "lon": -84.2183 },
+  { "name": "Chicago, IL", "label": "Chicago", "zip": "60601", "lat": 41.885, "lon": -87.6224 }
+]
