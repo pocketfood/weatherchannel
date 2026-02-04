@@ -375,7 +375,7 @@ body {
   z-index: 3;
 }
 
-.map-frame .maptalks-map {
+.map-frame .maplibre-map {
   width: 100%;
   height: 100%;
   position: absolute;
@@ -383,9 +383,14 @@ body {
   z-index: 1;
 }
 
-.map-frame .maptalks-layer canvas,
-.map-frame canvas.maptalks-canvas {
+.map-frame .maplibregl-canvas {
   filter: grayscale(0.15) saturate(0.9) contrast(1.12) brightness(1.2);
+}
+
+.map-frame .maplibregl-ctrl,
+.map-frame .maplibregl-ctrl-logo,
+.map-frame .maplibregl-ctrl-attrib {
+  display: none !important;
 }
 
 .map-loading {
